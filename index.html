@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 24px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 9px #999;
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn:active {
+            background-color: #3e8e41;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+        .btn-clear {
+            background-color: #f44336;
+        }
+        .btn-clear:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Image</h1>
+        <input type="file" id="fileInput">
+        <button class="btn" id="uploadBtn">Upload Image</button>
+        <button class="btn btn-clear" id="clearBtn">Clear Image</button>
+        <a href="/" class="btn">Home</a>
+        <div id="imageDisplay"></div>
+    </div>
+    <script>
+        document.getElementById('uploadBtn').addEventListener('click', function() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('Please select a file.');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('imageDisplay').innerHTML = `
+                        <h2>Original Image</h2>
+                        <img src="${data.original_image}" alt="Original Image">
+                        <h2>Contour Image</h2>
+                        <img src="${data.contour_image}" alt="Contour Image">
+                        <p>Objects Detected: ${data.object_count}</p>
+                    `;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('fileInput').value = '';
+            document.getElementById('imageDisplay').innerHTML = '';
+        });
+    </script>
+</body>
+</html>
